@@ -1,0 +1,28 @@
+/* typography */
+
+html {
+  font-family: 'helvetica neue', helvetica, arial, sans-serif;
+}
+
+body {
+    background-color: #333333;
+}
+
+thead th, tfoot th {
+  font-family: 'Rock Salt', cursive;
+  font-weight: 700;
+}
+
+.text-end {
+  font-family: 'Rock Salt', cursive;
+  font-size: 0.7em;
+}
+
+#dashboard-1 {
+  background: #333333;
+}
+
+canvas.marks {
+    max-width: 100%!important;
+    height: auto!important;
+}
