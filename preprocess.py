@@ -1,42 +1,45 @@
-"""
-- number of runs
-- total distance of walks
-- total distance of runs
-- total distance of walks + runs
-
-- show best runs (sort + head)
-- show best time for 1km, 2km 
-- line plot (smoothed) of 1km run time
-- calendar plot / bubble plot
-    - show PB days
-- runs by time of day (6pm, 7pm etc)
-"""
-from datetime import timedelta
-
 import pandas as pd
 
+policy = pd.read_csv("./data/policy.csv")
 
-df = pd.read_csv("./data/jan2022_to_june2022.csv", parse_dates=['startTime'])
-df['date'] = (df['startTime'] + timedelta(hours=7)).dt.strftime("%Y-%m-%d %H:%M")
+# policy dataset data preparation
+policy_modified = policy.copy()
 
-# walk is type 6, run is type 1
-runs = df[(df['type'] == 1) & (df['distance(m)'] >= 1000)].copy()
-num_of_runs = runs.shape[0] # 63
-print(num_of_runs)
+# a. change data type
+policy_modified = policy_modified.astype(
+    {'RIDER_COUNT': 'int8', 'APPLICATION_DATE': 'datetime64[ns]', 'ISSUE_DATE': 'datetime64[ns]'})
 
-# runs['mins_per_km'] = runs['sportTime(s)'] / runs['distance(m)'] * 60
-runs['seconds_per_km'] = (1000 / runs['distance(m)']) * runs['sportTime(s)'] 
-m, s = divmod(runs['seconds_per_km'], 60)
+# b. mapped the payment term
+frequency_mapping = {
+    'Annually': 1,
+    'Semi-Annually': 2,
+    'Quarterly': 4,
+    'Monthly': 12
+}
+policy_modified['TERM_MAPPED'] = policy_modified['PAYMENT_TERM'].map(
+    frequency_mapping).astype(int)
 
-def create_m_s(seconds):
-    m, s = divmod(seconds, 60)
-    return "{:02.0f}:{:02.2f}".format(m, s)
+# c. create annualized premium
+policy_modified['ANNUALIZED_PREMIUM'] = policy_modified['TERM_MAPPED'] * \
+    policy_modified['PREMIUM']
 
-runs['speed_per_km'] = runs['seconds_per_km'].map(lambda x: create_m_s(x))
-runs = runs.sort_values(by='seconds_per_km')
+# d. get the policy processing period in days
+policy_modified['POLICY_PROCESSING_PERIOD'] = (
+    policy_modified['ISSUE_DATE']-policy_modified['APPLICATION_DATE']).dt.days
 
-# runs['distance_rounded'] = (runs['distance(m)'].round(decimals=-3)/1000).astype('category')
-runs['distance_rounded'] = (runs['distance(m)']//1000).astype('category')
-run_1km = runs[runs['distance_rounded'] == 1.0].sort_values(by='startTime')
+# e. create policy purchase sequence
+policy_modified = policy_modified.assign(
+    PURCHASE_SEQ=policy_modified.groupby(['CLIENT_ID']).cumcount() + 1)
 
-run_1km.to_csv('./data/run_1km.csv')
+# f. create number of policy ownership
+policy_modified = policy_modified.assign(POLICY_OWNERSHIP=policy_modified.groupby([
+                                         'CLIENT_ID'])['POLICY_ID'].transform('count'))
+
+# g. remove policy with premium = 0
+policy_modified = policy_modified.loc[policy_modified['PREMIUM'] > 0].reset_index(
+    drop=True)
+
+# h. remove policy with outlier annualized premium (the only Billion Peso premium)
+policy_modified = policy_modified.loc[policy_modified['ANNUALIZED_PREMIUM']
+                                      != policy_modified.ANNUALIZED_PREMIUM.max()].reset_index(drop=True)
+

@@ -1,28 +1,66 @@
 /* typography */
 
 html {
-  font-family: 'helvetica neue', helvetica, arial, sans-serif;
+    font-family: 'helvetica neue', helvetica, arial, sans-serif;
 }
 
 body {
-    background-color: #333333;
+    background-color: #f9f9dc;
+    color: #800020;
 }
 
-thead th, tfoot th {
-  font-family: 'Rock Salt', cursive;
-  font-weight: 700;
+thead th,
+tfoot th {
+    font-family: 'Roboto', cursive;
+    font-weight: 700;
 }
 
 .text-end {
-  font-family: 'Rock Salt', cursive;
-  font-size: 0.7em;
+    font-family: 'Roboto', cursive;
+    font-size: 0.9em;
+    color: #f9f9dc;
 }
 
 #dashboard-1 {
-  background: #333333;
+    background: #f9f9dc;
 }
 
 canvas.marks {
-    max-width: 100%!important;
-    height: auto!important;
+    max-width: 100% !important;
+    height: auto !important;
+}
+
+#bestagents{
+    border: 2px solid black;
+    color: #800020;
+}
+
+#bestagents th {
+    border: 2px solid black;
+}
+
+#bestagents td {
+    border: 2px solid black;
+}
+
+#bestagents tr:hover {
+    color: #f9f9dc;
+    background-color: #8a7e72;
+}
+
+.card {
+    /* Add shadows to create the "card" effect */
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+    transition: 0.3s;
+    background-color: #8a7e72;
+}
+
+/* On mouse-over, add a deeper shadow */
+.card:hover {
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+}
+
+
+#total_num_runs, #walk_dist, #run_walk_dist, #run_dist{
+    color: #f9f9dc;
 }
